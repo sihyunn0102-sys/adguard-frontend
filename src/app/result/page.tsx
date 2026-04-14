@@ -9,11 +9,11 @@ export default function ResultPage() {
 
   useEffect(() => {
     const fetchMockData = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // 2.5초간 AI가 정화하는 연출을 합니다.
+      await new Promise((resolve) => setTimeout(resolve, 2500));
 
       const fakeData = {
         riskLevel: "High",
-        // 💡 긴 글 테스트를 위해 데이터 길이를 대폭 늘렸습니다!
         spellCheck: {
           original: [
             {
@@ -28,11 +28,7 @@ export default function ResultPage() {
               isError: false,
             },
             { text: "의약품을 완벽히 대체", isError: true },
-            {
-              text: "할 수 있습니다. 매일 밤 바르고 주무시면 ",
-              isError: false,
-            },
-            { text: "10년 전 피부로 완벽하게 되돌려 드립니다.", isError: true },
+            { text: "할 수 있습니다.", isError: false },
           ],
           corrected: [
             {
@@ -47,14 +43,7 @@ export default function ResultPage() {
               isFix: false,
             },
             { text: "일상적인 스킨케어용", isFix: true },
-            {
-              text: "으로 적합합니다. 매일 밤 꾸준히 사용하시면 ",
-              isFix: false,
-            },
-            {
-              text: "건강하고 생기 있는 피부 유지에 도움을 줄 수 있습니다.",
-              isFix: true,
-            },
+            { text: "으로 적합합니다.", isFix: false },
           ],
         },
         suggestions: [
@@ -78,139 +67,149 @@ export default function ResultPage() {
     fetchMockData();
   }, []);
 
+  // 1. 로딩 상태일 때 (Gleb 스타일 AI 스피어)
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 font-sans">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-500 mb-6 border-t-transparent"></div>
-        <p className="text-lg text-zinc-600 font-bold animate-pulse">
-          AI가 화장품 광고 위반 여부를 분석하고 있습니다... 🔍
-        </p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white font-sans overflow-hidden">
+        <div className="relative w-80 h-80 flex items-center justify-center">
+          <div className="absolute w-full h-full bg-gradient-to-tr from-blue-400/20 to-purple-400/20 blur-[100px] animate-pulse"></div>
+          <div className="relative w-48 h-48 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-full blur-[2px] shadow-[0_0_50px_rgba(59,130,246,0.3)] animate-morphing overflow-hidden">
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm opacity-50"></div>
+            <div className="absolute top-[-20%] left-[-20%] w-full h-full bg-white/20 blur-2xl rounded-full"></div>
+          </div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span className="text-[10px] font-black tracking-[0.3em] text-blue-700/60 uppercase mb-2">
+              Analyzing
+            </span>
+            <div className="flex gap-1">
+              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce"></div>
+              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+            </div>
+          </div>
+        </div>
+        <div className="mt-8 text-center z-10">
+          <h2 className="text-2xl font-black text-zinc-900 tracking-tight">
+            AI 광고 청정기 가동 중
+          </h2>
+          <p className="text-zinc-400 mt-2 font-medium">
+            허위 광고 문구를 정화하고 있습니다...
+          </p>
+        </div>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+          @keyframes morphing {
+            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: rotate(0deg); }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; transform: rotate(180deg); }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: rotate(360deg); }
+          }
+          .animate-morphing { animation: morphing 8s ease-in-out infinite; }
+        `,
+          }}
+        />
       </div>
     );
   }
 
+  // 2. 분석 완료 후 결과 화면
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 p-8 font-sans">
-      <main className="flex flex-col gap-8 bg-white p-10 rounded-3xl shadow-xl border border-zinc-200 max-w-4xl w-full">
-        {/* 상단 헤더 & 신호등 뱃지 */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-extrabold text-zinc-900">
-            🔍 분석 결과
-          </h1>
-          {resultData.riskLevel === "High" && (
-            <span className="px-4 py-1.5 bg-red-100 text-red-600 rounded-full font-bold text-sm shadow-sm">
-              위험 (🔴 High)
+    <div className="min-h-screen bg-zinc-50 flex flex-col items-center py-12 px-6">
+      <main className="w-full max-w-5xl bg-white rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-zinc-100 p-10 md:p-14">
+        {/* 헤더 섹션 */}
+        <div className="flex justify-between items-end mb-12">
+          <div>
+            <span className="text-blue-600 font-black text-xs tracking-widest uppercase mb-2 block">
+              Analysis Report
             </span>
+            <h1 className="text-4xl font-black text-zinc-900 tracking-tighter">
+              분석 결과 리포트
+            </h1>
+          </div>
+          {resultData.riskLevel === "High" && (
+            <div className="bg-red-50 text-red-600 px-6 py-2 rounded-full font-black text-sm border border-red-100">
+              🔴 위험 단계
+            </div>
           )}
         </div>
 
-        {/* 🚀 스크롤이 적용된 좌우 분할 비교 화면 (긴 글 최적화) */}
-        <div className="flex flex-col gap-4 p-6 bg-zinc-50 rounded-2xl border border-zinc-200 shadow-inner">
-          <h3 className="font-bold text-zinc-800 flex items-center gap-2">
-            📝 문구 교정 전/후 비교
-            <span className="text-xs font-normal text-zinc-500 bg-white px-2 py-1 rounded border border-zinc-200 ml-2">
-              긴 글은 스크롤하여 확인하세요
-            </span>
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* 왼쪽: 수정 전 (빨간펜) */}
-            <div className="flex flex-col bg-white rounded-xl border border-red-200 shadow-sm overflow-hidden">
-              <div className="bg-red-50/50 p-3 border-b border-red-100 flex justify-between items-center">
-                <span className="text-sm font-bold text-red-600">
-                  수정 전 (위반 소지)
-                </span>
-                <span className="text-red-400 text-xs">🔴</span>
-              </div>
-              {/* h-[200px] 와 overflow-y-auto 로 고정 높이 + 스크롤 생성! */}
-              <div className="p-4 h-[200px] overflow-y-auto leading-loose">
-                <p className="text-[15px] text-zinc-700 font-medium">
-                  {resultData.spellCheck.original.map(
-                    (chunk: any, index: number) => (
-                      <span
-                        key={index}
-                        className={
-                          chunk.isError
-                            ? "bg-red-100 text-red-700 px-1 rounded border border-red-200 line-through decoration-red-400 decoration-2 font-bold mx-0.5"
-                            : ""
-                        }
-                      >
-                        {chunk.text}
-                      </span>
-                    ),
-                  )}
-                </p>
-              </div>
+        {/* Before/After 비교 영역 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          <div className="bg-zinc-50 rounded-[32px] p-8 border border-zinc-100 relative">
+            <div className="absolute top-6 right-8 text-[10px] font-black text-red-300 tracking-widest uppercase">
+              Before
             </div>
-
-            {/* 오른쪽: 수정 후 (초록펜) */}
-            <div className="flex flex-col bg-white rounded-xl border border-green-200 shadow-sm overflow-hidden">
-              <div className="bg-green-50/50 p-3 border-b border-green-100 flex justify-between items-center">
-                <span className="text-sm font-bold text-green-700">
-                  수정 후 (안전함)
+            <h4 className="text-zinc-400 font-bold text-sm mb-6">
+              수정 전 위반 문구
+            </h4>
+            <div className="h-48 overflow-y-auto leading-relaxed text-lg text-zinc-600">
+              {resultData.spellCheck.original.map((chunk: any, i: number) => (
+                <span
+                  key={i}
+                  className={
+                    chunk.isError
+                      ? "bg-red-100 text-red-700 px-1 rounded-md line-through decoration-red-300 decoration-2 mx-0.5"
+                      : ""
+                  }
+                >
+                  {chunk.text}
                 </span>
-                <span className="text-green-500 text-xs">🟢</span>
-              </div>
-              <div className="p-4 h-[200px] overflow-y-auto leading-loose">
-                <p className="text-[15px] text-zinc-700 font-medium">
-                  {resultData.spellCheck.corrected.map(
-                    (chunk: any, index: number) => (
-                      <span
-                        key={index}
-                        className={
-                          chunk.isFix
-                            ? "bg-green-100 text-green-800 px-1 rounded border border-green-300 font-bold mx-0.5"
-                            : ""
-                        }
-                      >
-                        {chunk.text}
-                      </span>
-                    ),
-                  )}
-                </p>
-              </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-blue-50/30 rounded-[32px] p-8 border border-blue-100/50 relative">
+            <div className="absolute top-6 right-8 text-[10px] font-black text-blue-300 tracking-widest uppercase">
+              After
+            </div>
+            <h4 className="text-blue-600 font-bold text-sm mb-6">
+              AI 정화 완료
+            </h4>
+            <div className="h-48 overflow-y-auto leading-relaxed text-lg text-zinc-800">
+              {resultData.spellCheck.corrected.map((chunk: any, i: number) => (
+                <span
+                  key={i}
+                  className={
+                    chunk.isFix
+                      ? "bg-blue-600 text-white px-1.5 py-0.5 rounded-md font-bold mx-0.5 shadow-sm"
+                      : ""
+                  }
+                >
+                  {chunk.text}
+                </span>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* AI 수정안 제안 카드 */}
-        <div className="space-y-4">
-          <h3 className="font-bold text-zinc-800 flex items-center gap-2">
-            ✨ 추가 제안 및 요약{" "}
-            <span className="text-sm font-normal text-zinc-500">
-              (클릭하여 복사)
-            </span>
-          </h3>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {resultData.suggestions.map((item: any) => (
-              <div
-                key={item.id}
-                className="group relative p-5 border border-blue-100 bg-white rounded-2xl shadow-sm hover:border-blue-300 hover:shadow-md hover:bg-blue-50/30 transition-all cursor-pointer overflow-hidden"
-              >
-                <span className="absolute top-0 right-0 bg-zinc-100 text-zinc-600 text-xs font-bold px-3 py-1.5 rounded-bl-xl group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors">
-                  {item.tag}
-                </span>
-                <p className="text-zinc-800 font-medium mt-3 leading-relaxed">
-                  {item.text}
-                </p>
-              </div>
-            ))}
-          </div>
+        {/* 추천 제안 영역 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+          {resultData.suggestions.map((item: any) => (
+            <div
+              key={item.id}
+              className="p-6 bg-white border border-zinc-100 rounded-[24px] hover:border-blue-200 hover:shadow-lg transition-all cursor-pointer group"
+            >
+              <span className="text-[10px] font-black tracking-widest text-zinc-400 group-hover:text-blue-500 transition-colors uppercase">
+                {item.tag}
+              </span>
+              <p className="mt-3 text-zinc-700 font-medium">{item.text}</p>
+            </div>
+          ))}
         </div>
 
-        {/* 하단 버튼 */}
-        <div className="flex gap-4 mt-4">
+        {/* 하단 내비게이션 버튼 */}
+        <div className="flex gap-4">
           <Link
             href="/upload"
-            className="flex-1 h-14 flex items-center justify-center bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-colors"
+            className="flex-1 h-16 bg-zinc-900 text-white rounded-2xl flex items-center justify-center font-bold hover:bg-zinc-800 transition-all text-lg shadow-lg"
           >
-            다시 검사하기
+            새 이미지 검사
           </Link>
           <Link
             href="/"
-            className="flex-1 h-14 flex items-center justify-center border-2 border-zinc-200 rounded-xl font-bold text-zinc-600 hover:bg-zinc-50 hover:border-zinc-300 transition-colors"
+            className="px-10 h-16 border-2 border-zinc-100 text-zinc-400 rounded-2xl flex items-center justify-center font-bold hover:bg-zinc-50 transition-all text-lg"
           >
-            홈으로
+            홈
           </Link>
         </div>
       </main>
